@@ -1,18 +1,32 @@
 from machine import I2C
 from vl53l1x import VL53L1X
+import sensor, image, time,json
 from pyb import UART
+import json
+import struct ,pyb
 #1:red 2:green 3:blue
 
+def find_max(blobs):#return the max blob
+    max_size=0
     for blob in blobs:
+    if blob.pixels() > max_size:
         max_blob=blob
+        max_size = blob.pixels()
         return max_blob
+def send_data_packet(x, y):#串口发送函数定义
     temp = struct.pack("<bbii", #格式为俩个字符俩个整型
+    0xAA, #帧头1
+    0xAE, #帧头2
     int(x), # up sample by 4 #数据1
     int(y)) # up sample by 4 #数据2
     uart.write(temp) #串口发送
+    print(x,y)
 
+def compareBlob(blob1,blob2):#比较色块后返回最大值
+    tmp = blob1.pixels() - blob2.pixels()
     if tmp == 0:
         return 0;
+    elif tmp > 0:
         return 1;
     else:
         return -1;
